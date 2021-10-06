@@ -42,10 +42,10 @@ grid_data$northing <- NA
 
 # Filtering the gridmet data to a given the spatial extent
 grid_data <- grid_data %>% 
-  filter(lat < 37.30) %>%     # Lat max (37.746)
-  filter(lat > 37.20) %>%     # Lat min (36.964)
-  filter(lon < -118.90) %>%   # Lon max (-118.651)
-  filter(lon > -119.10)       # Lon min (-119.749)
+  filter(lat < 37.20) %>%     # Lat max
+  filter(lat > 37.10) %>%     # Lat min
+  filter(lon < -118.90) %>%   # Lon max
+  filter(lon > -119.10)       # Lon min
 
 
 # Adding northing and easting data UTM Zone 11 
@@ -83,7 +83,7 @@ time_data$hour <- format(time_data$datetime, "%H")
 
 ### Loop throught stations for all time steps (Met Data) #############################################
 
-#for(i in 1:3){ # Station Loop, i Loop
+#for(i in 1){ # Station Loop, i Loop
 for(i in 1:nrow(grid_data)){ # Station Loop, i Loop
   
   tmp_station <- grid_data[i,] # Station information for the station loop
@@ -107,6 +107,7 @@ for(i in 1:nrow(grid_data)){ # Station Loop, i Loop
     
       # Calculating Tair
     tmp_ts_data <- tmp_ts_data %>% mutate(Tair=((Tmax+Tmin)/2)-273.15) # Mathematical Average & converting K to C
+    tmp_ts_data$Tair <- round(tmp_ts_data$Tair, digits=2) 
     
       # Closing and removing the air temperature NC files
     nc_close(Tmax.nc)

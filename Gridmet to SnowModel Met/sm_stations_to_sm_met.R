@@ -25,7 +25,9 @@ end <- as.POSIXct("2020-09-30 00:00", tz = "UTC")
 ### met files #####################################################################################
 
 # Listing met stations files
-station_files <- list.files(paste0(sfl,"/SnowModel Station Data"),pattern=".csv", full.names=TRUE)
+station_files <- list.files(paste0(sfl,"/SnowModel Station Data"),pattern=".csv", full.names=TRUE) # Loading all the statin file names
+station_files <- station_files[order(nchar(station_files),station_files)] # Ordering the station files by number
+
 
 # counting number of met stations and timesteps
 station_count <- length(station_files)
