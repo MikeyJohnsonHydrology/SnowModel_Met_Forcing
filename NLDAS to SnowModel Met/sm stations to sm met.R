@@ -26,6 +26,7 @@ end <- as.POSIXct("2016-09-30 23:00", tz = "UTC")
 
 # Listing met stations files
 station_files <- list.files(paste0(sfl,"/SnowModel Stations"),pattern=".csv", full.names=TRUE)
+station_files <- station_files[order(nchar(station_files),station_files)] # Ordering the station files by number
 
 # counting number of met stations and timesteps
 station_count <- length(station_files)
@@ -140,21 +141,36 @@ for (i in 1:length(station_files)){
 }
 
 # Building the SM met file
-# Note: this will take some time to run
-data <- c(station_count,rep(NA, 12))     # start of the return data list
-for (i in 1:nt){
-  data <- rbind(data, do.call(rbind,(lapply(Stations, function(x) x[i,]))))
-  data <- rbind(data,c(station_count,rep(NA, 12)))
-}
+# Notes: 
+#     - this code will take some time to run
+#     - this code is designed write daily data to a text file (.dat file)
+#     - this is done by looping through all the timepieces and appending the station data from that day
 
-# saving the sm file to the to the SnowModel_met folder
-write.table(data,
-            file = paste0(sfl,"/SnowModel Met LW/Sagehen_LW_WY2016_V1.dat"),
-            append = FALSE, quote = TRUE, sep = "\t",
-            eol = "\n", na = "", dec = ".", row.names = FALSE,
-            col.names = FALSE, qmethod = c("escape", "double"),
-            fileEncoding = "")
-
-# clearing the data
-rm(data,Stations,station_files,station_count,nt)
-
+{
+  # 1st timestep
+  data <- rbind(c(station_count,rep(NA, 12)),
+                do.call(rbind,(lapply(Stations, function(x) x[1,]))))
+  
+  # Writing the initial file
+  write.table(data,
+              file = paste0(sfl,"/SnowModel Met File/SnowModel_Met.dat"),
+              append = FALSE, quote = TRUE, sep = "\t",
+              eol = "\n", na = "", dec = ".", row.names = FALSE,
+              col.names = FALSE, qmethod = c("escape", "double"),
+              fileEncoding = "")
+  rm(data)
+  
+  # 2nd to n-th timestep loop
+  for (i in 2:nt){
+    data <- rbind(c(station_count,rep(NA, 12)),
+                  do.call(rbind,(lapply(Stations, function(x) x[i,]))))
+    
+    write.table(data,
+                file = paste0(sfl,"/SnowModel Met File/SnowModel_Met.dat"),
+                append = TRUE, quote = TRUE, sep = "\t",
+                eol = "\n", na = "", dec = ".", row.names = FALSE,
+                col.names = FALSE, qmethod = c("escape", "double"),
+                fileEncoding = "")
+    rm(data)
+  } # End of the timestep loop
+} # End of data save
